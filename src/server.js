@@ -14,5 +14,5 @@ connectToDB().then(()=>{
 })
 
 app.listen(port, (req,res)=>{
-console.log(`Server is listening at port : ${port}`)
+console.log(`Server is listening at port : ${port} `)
 })

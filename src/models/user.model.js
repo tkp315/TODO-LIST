@@ -37,18 +37,22 @@ const userSchema = new Schema(
                 type:mongoose.Schema.Types.ObjectId,
                 ref:"Task" 
             }
-        ]
-
+        ],
+          isFinished:{
+            type:Boolean
+          }
     },
     {timestamps:true})
 
 
-    userSchema.pre("save",async function(next){
-        if(!(this.isModified("password")))return next();
-
-        const encryptedPassword = await bcrypt.hash(this.password,10);
+    userSchema.pre("save", async function(next) {
+        if (!this.isModified("password")) return next();
+    
+        const encryptedPassword = await bcrypt.hash(this.password, 10);
+        this.password = encryptedPassword; // Assign the hashed password back to the user object
         next();
-    })
+    });
+    
 
 
     userSchema.methods.generateAccessToken=function(){

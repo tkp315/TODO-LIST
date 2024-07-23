@@ -10,11 +10,11 @@ description:{
     required:true 
 },
 dateAdded:{
-    type:Date(),
-    required:true
+    type:Date,
+    // required:true
 },
-dateCompleted:{
-    type:Date(),
+dateOfComplition:{
+    type:Date,
 }
 },{timestamps:true})
 
