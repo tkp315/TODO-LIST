@@ -8,7 +8,7 @@ import { taskRouter } from './routes/task.route.js';
 const app = express();
 
 app.use(cors({
-    origin:process.env.ORIGIN,
+    origin:"https://main--design-the-day.netlify.app/login",
     credentials:true 
 }))
 
