@@ -1,13 +1,16 @@
 import { User } from "../models/user.model.js";
+import mongoose from 'mongoose'
 import bcrypt from 'bcrypt'
 import ApiError from "../utilities/apiError.js";
 import { ApiResponse } from "../utilities/apiResponse.js";
 import asyncHandlerFunction from "../utilities/asyncHandler.js"
 import { uploadOnCloudinary } from "../utilities/cloudinary.js";
+import { Category } from "../models/category.model.js";
 
 const signup=asyncHandlerFunction(async(req,res)=>{
 
     const {name,email, password, confirmPassword}=req.body;
+    console.log(req.file)
 
     if([name,email, password, confirmPassword,].some((e)=>e==="")){
         throw new ApiError(401,"Enter all the fields");
@@ -132,4 +135,29 @@ const taskList = asyncHandlerFunction(async (req, res) => {
     }
 });
 
-export{signup,login, logout,taskList}
+const folderTasks= asyncHandlerFunction(async(req,res)=>{
+    const uid= req.user._id
+    const {folderId}=req.body
+    const fid = new mongoose.Types.ObjectId(folderId);
+
+    const findFolder = await Category.findById(fid).populate("tasks");
+    if(!findFolder){
+        throw new ApiError(401,"folder not found");
+    }
+
+
+       
+    return res.status(200)
+.json(new ApiResponse(200,{findFolder},"Getting all the tasks"))
+})
+const allFolders=asyncHandlerFunction(async(req,res)=>{
+    const uid = req.user._id;
+
+    const category = await User.findById(uid).populate("category");
+
+    return res.status(200).json(new ApiResponse(200,{category},"all folders"))
+})
+
+
+
+export{signup,login, logout,taskList,folderTasks,allFolders}

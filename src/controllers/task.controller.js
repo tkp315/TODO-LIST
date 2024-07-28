@@ -1,3 +1,4 @@
+import { Category } from "../models/category.model.js";
 import { Task } from "../models/task.model.js";
 import { User } from "../models/user.model.js";
 import ApiError from "../utilities/apiError.js";
@@ -7,9 +8,14 @@ import mongoose from 'mongoose'
 
 const newTask = asyncHandlerFunction(async(req,res)=>{
 
-    const{title, description, dateAdded}= req.body;
+    const{title,  dateAdded,categoryId}= req.body;
     const userId = req.user._id;
-    if([title, description, dateAdded].some((e)=>e==="")){
+    let cid="";
+    if(categoryId){
+     cid= new mongoose.Types.ObjectId(categoryId);
+    }
+
+    if([title,  dateAdded].some((e)=>e==="")){
         throw new ApiError(401,'please complete all the details');
     }
     
@@ -19,10 +25,17 @@ const newTask = asyncHandlerFunction(async(req,res)=>{
 
     const task = await Task.create({
         title,
-        description,
-        dateAdded:new Date ()
         
+        dateAdded:new Date (dateAdded),
+        category:cid?cid:null
     })
+    if(cid){
+        const category = await Category.findById(cid);
+        const taskList = category.tasks.push(task._id);
+    await category.save();
+    }
+    
+    
 
     const addTaskInUser = await User.findByIdAndUpdate(userId,{
         $push:{
@@ -37,15 +50,17 @@ const newTask = asyncHandlerFunction(async(req,res)=>{
 
 const isFinished = asyncHandlerFunction(async(req,res)=>{
     const userId =req.user._id;
-    const {taskId,dateOfComplition}= req.body;
+    const {taskId,catId}= req.body;
     const tid = new mongoose.Types.ObjectId(taskId);
+    const cid = new mongoose.Types.ObjectId(catId);
+
     if(!tid){
         throw new ApiError(401,"Task id  is not found");
     }
     const user = await User.findById(userId);
 
      await Task.findByIdAndUpdate(tid,{
-     dateOfComplition:new Date()
+     dateOfComplition:Date.now()
     },{new:true})
 
  
@@ -56,6 +71,13 @@ const isFinished = asyncHandlerFunction(async(req,res)=>{
 
    user.onGoingTask= user.onGoingTask.filter((item)=>!item.equals(tid));
     await user.save();
+   
+    if(catId){
+        const category = await Category.findById(cid);
+
+        category.tasks = category.tasks.filter((item)=>!item._id.equals(tid));
+        await category.save();
+    }
 
     return res
     .status(200)
@@ -67,7 +89,9 @@ const isFinished = asyncHandlerFunction(async(req,res)=>{
 
 const editTask = asyncHandlerFunction(async(req,res)=>{
     const userId =req.user._id;
-    const {taskId,newTitle, newDescription}= req.body;
+    const {taskId,newTitle}= req.body;
+    if(!taskId)throw new ApiError(401,"TaskId is not defined");
+    if(!newTitle)throw new ApiError(401,"new Title is not defined");
     const tid = new mongoose.Types.ObjectId(taskId);
     if(!tid){
         throw new ApiError(401,"Task id  is not found");
@@ -80,7 +104,8 @@ const editTask = asyncHandlerFunction(async(req,res)=>{
     
     const updateTask = await task.updateOne({
         title:newTitle,
-        description:newDescription
+        dateAdded:Date.now()
+      
     })
 
     return res

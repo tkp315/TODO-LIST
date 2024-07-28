@@ -40,7 +40,11 @@ const userSchema = new Schema(
         ],
           isFinished:{
             type:Boolean
-          }
+          },
+          category:[{
+            type:mongoose.Schema.Types.ObjectId,
+            ref:"Category"
+          }]
     },
     {timestamps:true})
 
