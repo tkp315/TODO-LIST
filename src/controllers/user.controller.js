@@ -73,8 +73,8 @@ const login=asyncHandlerFunction(async(req,res)=>{
 
 
     const options={
-        httpOnly:true,
-        // secure:true
+         secure:process.env.NODE_ENV==='production',
+    sameSite:'none'
     }
 
     return res
@@ -89,8 +89,8 @@ const logout=asyncHandlerFunction(async(req,res)=>{
     const user = await User.findById(req.user._id);
 
     const options = {
-        httpOnly:true,
-        // secure:true
+        secure:process.env.NODE_ENV==='production',
+    sameSite:'none'
     }
 
     user.updateOne({
