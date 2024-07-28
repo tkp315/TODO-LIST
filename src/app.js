@@ -8,9 +8,18 @@ import { taskRouter } from './routes/task.route.js';
 const app = express();
 
 app.use(cors({
-    origin:"https://main--design-the-day.netlify.app/login",
+    origin:"https://main--design-the-day.netlify.app",
     credentials:true 
 }))
+
+// app.options('*', cors({
+//     origin: 'https://668d56e981675392b7330c1a--chipper-dasik-f0ac93.netlify.app',
+//     // origin:"http://localhost:3000",
+//     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+//     credentials: true,
+    
+//   }));
+  
 
 app.use(cookieParser())
 
