@@ -74,7 +74,8 @@ const login=asyncHandlerFunction(async(req,res)=>{
 
     const options={
          secure:process.env.NODE_ENV==='production',
-    sameSite:'none'
+    sameSite:'none',
+    httpOnly:true
     }
 
     return res
