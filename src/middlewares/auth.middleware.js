@@ -47,9 +47,21 @@ const sessionTime = asyncHandlerFunction(async (req, res, next) => {
     throw new ApiError(401, "user is not found throught this token");
   }
 
-  const newAccessToken = user.generateAccessToken(user._id);
+  const newAccessToken = jwt.sign(
+    {
+     name: user.name,
+     _id: user._id,
+     email: user.email
+    },
+    process.env.ACCESS_TOKEN_SECRET,
+    {
+      expiresIn:`${process.env.ACCESS_TOKEN_EXPIRY}m`
+    }
+  )
   req.user = user;
-  res.cookie('accessToken', newAccessToken, { httpOnly: true, secure: true });
+  res.cookie('accessToken', newAccessToken, { httpOnly: true,
+    secure: process.env.NODE_ENV==='production',
+  });
   next();
 });
 export { verifyJWT,sessionTime };
