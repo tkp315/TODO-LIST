@@ -83,7 +83,7 @@ const userSchema = new Schema(
             
            process.env.ACCESS_TOKEN_SECRET,
            {
-           expiresIn:`${process.env.ACCESS_TOKEN_EXPIRY}d`
+           expiresIn:`${process.env.ACCESS_TOKEN_EXPIRY}m`
            }        
         )
     }

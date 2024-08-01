@@ -1,32 +1,55 @@
-import jwt from 'jsonwebtoken'
+import jwt from "jsonwebtoken";
 import ApiError from "../utilities/apiError.js";
 import asyncHandlerFunction from "../utilities/asyncHandler.js";
-import { User } from '../models/user.model.js';
+import { User } from "../models/user.model.js";
 
-const verifyJWT= asyncHandlerFunction(async (req,res,next)=>{
-    const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer","")
+const verifyJWT = asyncHandlerFunction(async (req, res, next) => {
+  const token =
+    req.cookies?.accessToken ||
+    req.header("Authorization")?.replace("Bearer", "");
 
-    if(!token){
+  if (!token) {
     //   res.redirect("/api/v1/user/login");
-    throw new ApiError(401,'token expired or not found');
-    }
-  
-    const decodedToken  =await jwt.verify(token,process.env.ACCESS_TOKEN_SECRET)
+    throw new ApiError(401, "token expired or not found");
+  }
 
-    const user = await User.findById(decodedToken?._id);
-    if(!user){
-      res.redirect("/api/v1/user/login");
-       
-    }
-    
-    req.user =user 
+  const decodedToken = await jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
-    req.user = user; 
-    if(!req.user){
-      res.redirect("/api/v1/user/login");
-    }
+  const user = await User.findById(decodedToken?._id);
+  if (!user) {
+    res.redirect("/api/v1/user/login");
+  }
 
-    next();
-})
+  req.user = user;
 
-export {verifyJWT}
+  req.user = user;
+  if (!req.user) {
+    res.redirect("/api/v1/user/login");
+  }
+
+  next();
+});
+const sessionTime = asyncHandlerFunction(async (req, res, next) => {
+  const refreshToken = req.cookies?.refreshToken;
+  if (!refreshToken) {
+    throw new ApiError(401, "refresh token not found");
+  }
+
+  const decodedToken = jwt.verify(
+    refreshToken,
+    process.env.REFRESH_TOKEN_SECRET
+  );
+  if (!decodedToken) {
+    throw new ApiError(401, "invalid token");
+  }
+  const user = await User.findById(decodedToken?._id);
+  if (!user) {
+    throw new ApiError(401, "user is not found throught this token");
+  }
+
+  const newAccessToken = user.generateAccessToken(user._id);
+  req.user = user;
+  res.cookie('accessToken', newAccessToken, { httpOnly: true, secure: true });
+  next();
+});
+export { verifyJWT,sessionTime };
