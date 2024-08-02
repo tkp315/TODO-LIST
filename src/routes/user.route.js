@@ -14,6 +14,4 @@ userRoute.route('/folder-tasks').post(verifyJWT ,folderTasks)
 userRoute.route('/new-folder').post(verifyJWT ,addCategory)
 userRoute.route('/all-folders').post(verifyJWT ,allFolders)
 
-
-
 export {userRoute}
