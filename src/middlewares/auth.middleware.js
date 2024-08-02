@@ -5,7 +5,7 @@ import { User } from "../models/user.model.js";
 
 
 const sessionTime = asyncHandlerFunction(async (req, res, next) => {
-  const refreshToken = req.cookies?.refreshToken;
+  const refreshToken = req.header("Authorization")?.replace("Bearer", "");
   if (!refreshToken) {
     throw new ApiError(401, "refresh token not found");
   }
