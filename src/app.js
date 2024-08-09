@@ -9,6 +9,8 @@ const app = express();
 
 app.use(cors({
     origin:"https://main--design-the-day.netlify.app",
+    // origin:"http://localhost:5173",
+
     credentials:true 
 }))
 

@@ -5,65 +5,75 @@ import { User } from "../models/user.model.js";
 
 
 const sessionTime = asyncHandlerFunction(async (req, res, next) => {
-  const refreshToken = req.header("Authorization")?.replace("Bearer", "");
+  const refreshToken = req.cookies?.refreshToken || req.header("Authorization")?.replace("Bearer ", "").trim();
+  
   if (!refreshToken) {
-    throw new ApiError(401, "refresh token not found");
+  throw new ApiError(401,"token expired, sorry");
   }
 
-  const decodedToken = jwt.verify(
-    refreshToken,
-    process.env.REFRESH_TOKEN_SECRET
-  );
-  if (!decodedToken) {
-    throw new ApiError(401, "invalid token");
-  }
-  const user = await User.findById(decodedToken?._id);
+
+  try {
+    const decodedToken = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    console.log(decodedToken);
+    const user = await User.findById(decodedToken?._id);
   if (!user) {
-    throw new ApiError(401, "user is not found throught this token");
+    throw new ApiError(401, "User not found");
   }
+    const newAccessToken = jwt.sign(
+      {
+        name: user.name,
+        _id: user._id,
+        email: user.email,
+      },
+      process.env.ACCESS_TOKEN_SECRET,
+      {
+        expiresIn: `${process.env.ACCESS_TOKEN_EXPIRY}m`,
+      }
+    );
+  
+    req.user = user;
+    res.cookie('accessToken', newAccessToken, {
+      httpOnly: true,
+      // secure: process.env.NODE_ENV === 'production', // Adjusted for local environment
+    });
+    next();
+  } catch (error) {
+    throw new ApiError(401, "Invalid token");
+  }
+  
+  
 
-  const newAccessToken = jwt.sign(
-    {
-     name: user.name,
-     _id: user._id,
-     email: user.email
-    },
-    process.env.ACCESS_TOKEN_SECRET,
-    {
-      expiresIn:`${process.env.ACCESS_TOKEN_EXPIRY}m`
-    }
-  )
-  req.user = user;
-  res.cookie('accessToken', newAccessToken, { httpOnly: true,
-    secure: process.env.NODE_ENV==='production',
-  });
-  next();
+ 
 });
 
 const verifyJWT = asyncHandlerFunction(async (req, res, next) => {
-  const token =
-    req.cookies?.accessToken ||
-    req.header("Authorization")?.replace("Bearer", "");
-
+  const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "").trim();
+  console.log('this is access token',token)
   if (!token) {
-  return sessionTime(req,res,next);
+    return sessionTime(req, res, next);
   }
 
-  const decodedToken = await jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+  try {
+    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const user = await User.findById(decodedToken?._id);
 
-  const user = await User.findById(decodedToken?._id);
-  if (!user) {
-    res.redirect("/api/v1/user/login");
+    if (!user) {
+      return res.redirect("/api/v1/user/login");
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      // Handle the expired token
+      return sessionTime(req, res, next);
+    } else {
+      // Handle other JWT errors
+      return res.status(401).json({ message: error.message });
+    }
   }
-
-  req.user = user;
-
-  req.user = user;
-  if (!req.user) {
-    res.redirect("/api/v1/user/login");
-  }
-
-  next();
 });
+
+
 
 export { verifyJWT };

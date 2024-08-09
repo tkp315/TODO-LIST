@@ -77,11 +77,14 @@ const login=asyncHandlerFunction(async(req,res)=>{
     sameSite:'none',
     httpOnly:true
     }
-
+    const option1= {
+        httpOnly:true,
+        // secure:true
+       }
     return res
           .status(200)
-          .cookie("accessToken",accessToken,options)
-          .cookie("refreshToken",refreshToken,options)
+          .cookie("accessToken",accessToken,option1)
+          .cookie("refreshToken",refreshToken,option1)
           .json(new ApiResponse(200,{userInDB,accessToken,refreshToken},"user is logged in "));
 
 })
@@ -93,7 +96,10 @@ const logout=asyncHandlerFunction(async(req,res)=>{
         secure:process.env.NODE_ENV==='production',
     sameSite:'none'
     }
-
+   const option1= {
+    httpOnly:true,
+    // secure:true
+   }
     user.updateOne({
         $set:{
             refreshToken:undefined
@@ -102,8 +108,8 @@ const logout=asyncHandlerFunction(async(req,res)=>{
 
     return res
     .status(200)
-    .clearCookie("accessToken",options)
-    .clearCookie("refreshToken",options)
+    .clearCookie("accessToken",option1)
+    .clearCookie("refreshToken",option1)
    .json(new ApiResponse(200,{},"user logged out succssefully"))
 
 })

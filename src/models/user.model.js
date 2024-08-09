@@ -69,7 +69,7 @@ const userSchema = new Schema(
             
            process.env.ACCESS_TOKEN_SECRET,
            {
-            expiresIn:`${process.env.ACCESS_TOKEN_EXPIRY}d`
+            expiresIn:`${process.env.ACCESS_TOKEN_EXPIRY}m`
            }        
         )
     }
@@ -81,9 +81,9 @@ const userSchema = new Schema(
                 email:this.email
             },
             
-           process.env.ACCESS_TOKEN_SECRET,
+           process.env.REFRESH_TOKEN_SECRET,
            {
-           expiresIn:`${process.env.ACCESS_TOKEN_EXPIRY}m`
+           expiresIn:`${process.env.REFRESH_TOKEN_EXPIRY}m`
            }        
         )
     }
