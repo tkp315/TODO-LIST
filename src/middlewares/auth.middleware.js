@@ -34,7 +34,7 @@ const sessionTime = asyncHandlerFunction(async (req, res, next) => {
     req.user = user;
     res.cookie('accessToken', newAccessToken, {
       httpOnly: true,
-      // secure: process.env.NODE_ENV === 'production', // Adjusted for local environment
+      secure: process.env.NODE_ENV === 'production', // Adjusted for local environment
     });
     next();
   } catch (error) {

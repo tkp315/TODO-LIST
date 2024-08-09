@@ -83,8 +83,8 @@ const login=asyncHandlerFunction(async(req,res)=>{
        }
     return res
           .status(200)
-          .cookie("accessToken",accessToken,option1)
-          .cookie("refreshToken",refreshToken,option1)
+          .cookie("accessToken",accessToken,options)
+          .cookie("refreshToken",refreshToken,options)
           .json(new ApiResponse(200,{userInDB,accessToken,refreshToken},"user is logged in "));
 
 })
@@ -108,8 +108,8 @@ const logout=asyncHandlerFunction(async(req,res)=>{
 
     return res
     .status(200)
-    .clearCookie("accessToken",option1)
-    .clearCookie("refreshToken",option1)
+    .clearCookie("accessToken",options)
+    .clearCookie("refreshToken",options)
    .json(new ApiResponse(200,{},"user logged out succssefully"))
 
 })
