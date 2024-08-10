@@ -10,9 +10,9 @@ const taskSchema = new Schema(
       type: Date,
        // If you want a default value
     },
-    // dateOfComplition: {
-    //   type: Date,
-    // },
+    dateOfComplition: {
+      type: Date,
+    },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category"

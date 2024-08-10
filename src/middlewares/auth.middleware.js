@@ -58,7 +58,7 @@ const verifyJWT = asyncHandlerFunction(async (req, res, next) => {
     const user = await User.findById(decodedToken?._id);
 
     if (!user) {
-      return res.redirect("/api/v1/user/login");
+      throw new ApiError(401,"user not found");
     }
 
     req.user = user;
