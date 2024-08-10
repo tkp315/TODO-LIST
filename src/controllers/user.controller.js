@@ -93,6 +93,7 @@ const logout=asyncHandlerFunction(async(req,res)=>{
     const user = await User.findById(req.user._id);
 
     const options = {
+        httpOnly:true,
         secure:process.env.NODE_ENV==='production',
     sameSite:'none'
     }
